@@ -1,0 +1,93 @@
+syntax = "proto3";
+
+package outer.robot;
+
+import "common/errcode.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "Robot";
+
+enum ETulingErrorCode
+{
+	UNKNOWN = 0;
+	TULING_ERROR_CODE_DEFAULT = 1;
+	
+	ERROR_KEY_ERROR = 40001;				// apikey错误
+	ERROR_INFO_EMPTY = 40002;				// 请求内容为空
+	ERROR_REACH_DAY_COUNT_LIMIT = 40003;	// 当天请求次数用完
+	ERROR_DATA_FORMAT_ERROR = 40004;		// 数据格式异常
+}
+
+enum ERobotClass
+{
+	UNKNOWNCLASS = 0;
+	ROBOT_CLASS_DEFAULT = 1;
+	
+	CLASS_TEXT = 100000;		// 文本
+	CLASS_LINK = 200000;		// 链接
+	CLASS_NEWS = 302000;		// 新闻
+	CLASS_COOK_BOOK = 308000;	// 菜谱
+	CLASS_CHILD_SONG = 313000;	// 儿歌
+	CLASS_CHILD_POETRY = 314000;	// 儿童诗歌
+}
+
+message ClassTextData
+{
+	string text = 1;
+}
+
+message ClassLinkData
+{
+	string text = 1;
+	string url = 2;
+}
+
+message Article
+{
+	string article = 1;		//新闻标题
+	string source = 2;		//新闻来源
+	string icon = 3;		//新闻图片
+	string detailurl = 4;	//新闻链接详情
+}
+
+message ClassNewsData
+{
+	string text = 1;
+	repeated Article article = 2;
+}
+
+message CookBook
+{
+	string name = 1;		//菜名
+	string info = 2;		//菜谱信息
+	string detailurl = 3;	//详情链接
+	string icon = 4;		//信息图标
+}
+
+message ClassCookBookData
+{
+	string text = 1;
+	repeated CookBook article = 2;
+}
+
+
+// 自动回复请求
+message AutoReplyRequest {
+	string from_username = 1; // 发送方username
+	string appkey = 2;	// appkey
+	string content = 3;
+}
+// 自动回复响应
+message AutoReplyResponse
+{
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+	ERobotClass robot_class = 2;
+	bytes data = 3;	// 根据robot_response_code解析
+}
+
+// robot服务
+service RobotService {
+	// 自动回复API
+	rpc AutoReply (AutoReplyRequest) returns (AutoReplyResponse);
+}

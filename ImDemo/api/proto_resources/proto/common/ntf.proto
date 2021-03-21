@@ -1,0 +1,91 @@
+syntax = "proto3";
+
+package common.ntf;
+
+import "common/enumeration.proto";
+import "common/msg.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.common";
+option java_outer_classname = "Ntf";
+
+// 通知类型
+enum ENtfType
+{
+	// Session相关通知消息
+	UNKNOWNENTFTYPE = 0;
+	 LOGIN_RESPONSE = 5; // 登陆响应
+	LOGOUT_RESPONSE = 1; // 登出响应
+	KICK_NOTIFICATION = 2;		// 踢出通知
+    STREAM_INIT_RESPONSE = 3; // stream流初始化回复
+    PING_RESPONSE = 4; // Ping包响应
+
+	// 其他业务通知消息
+	NEW_MSG = 10;
+	FRIEND_UPDATE_NOTIFICATION = 11;	// 好友变更通知
+	RETRACT_NOTIFICATION = 12;	// 消息撤回通知
+	CARBON_MSG = 13;	// 伙伴终端消息通知
+	CALL_MSG = 14;	// 呼叫通知
+    GROUP_LIST_UPDATE_NOTIFICATION = 15; // 群列表变更通知
+
+    TRANSPARENT_MSG_NOTIFICATION = 17; //透传消息通知
+    TRANSPARENT_MSG_CARBON_NOTIFICATION = 18; //透传消息伙伴通知
+    CARMACHINE_STATUS_CHANGE_NOTIFICATION = 19; //同一个账号，车机端在线状态变更通知，通知给手机端；手机端收到此通知后，调查询用户登录状态接口
+    PERSONAL_INFORMATION_CHANGE_NOTIFICATION = 20; // 个人信息（昵称，头像，备注名等）变更后，同端抄送，终端收到此通知后，可调用获取个人信息（GetUserInfo）接口
+}
+//透传消息通知，仅用于不存储的消息，通知内携带消息体
+message TransparentMsgNotification {
+    common.msg.MessageUnit unit = 1;
+}
+
+//透传消息伙伴通知，仅用于不存储的消息，通知内携带消息体
+message TransparentMsgCarbonNotification {
+    common.msg.MessageUnit unit = 1;
+}
+
+// 新消息通知
+message NewMsgNotification
+{
+	string content = 1;
+    uint64 guid = 2;
+}
+
+// 伙伴终端消息通知
+message CarbonMsgNotification
+{
+	string content = 1;
+	string appkey = 2;
+	string sender_username = 3;
+	common.enumeration.EClientType sender_client_type = 4;	// 消息发送终端类型
+    uint64 guid = 5;
+}
+
+// 呼叫通知
+message CallMsgNotification
+{
+	common.enumeration.ECallMsgType call_msg_type = 1;
+	string content = 2;
+}
+
+// 踢出通知
+message KickNotification {
+	common.enumeration.EClientType login_client_type = 1;	// 新登录终端类型
+	string reason = 2; //踢人原因
+	string imei = 3; // 新登录终端的移动设备识别码
+}
+
+// 好友变更通知
+message FriendUpdateNotification
+{
+	string content = 1;
+}
+
+// 消息撤回通知
+message RetractNotification
+{
+	string appkey = 1;
+	common.msg.EMsgType msg_type = 2;	// 单聊 or群聊
+	string from_username = 3;	// 撤回者
+	string uri = 4;				// 群聊uri
+	uint64 retract_guid = 5;	// 被撤回消息guid
+}

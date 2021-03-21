@@ -1,0 +1,222 @@
+syntax = "proto3";
+
+package outer.chatroom;
+
+import "common/errcode.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "Chatroom";
+
+//聊天室简要信息
+message ChatroomInfo {
+    string room_name = 1;  //房间名字
+    uint64 room_id = 2; //房间ID
+}
+
+//聊天室房间状态
+enum ERoomState {
+    UNKNOWNEROOMSTATE = 0;
+    CLOSE = 2; //聊天室关闭
+    OPEN = 1; //聊天室开放
+}
+
+
+// 消息内容类型
+enum EMsgType {
+    UNKNOWNEMSGTYPE = 0;
+    TEXT = 1; //TEXT 文本消息
+}
+
+//用户角色
+enum ERole {
+    UNKNOWNEROLE = 0;
+    MEMBER = 3; //普通用户
+    ADMIN = 1; //管理员
+    OWNER = 2; //群主
+}
+
+// 成员结构
+message Crew {
+    string username = 1;
+    string appkey = 2;
+    string nick = 3;    // 成员昵称
+    ERole  role = 4;    // 角色
+    string modified = 5;//
+}
+
+// 聊天室信息结构
+message ChatroomDetail {
+    string owner_name = 1;  // 创建者
+    string room_name = 2;   //房间名字
+    uint64 room_id = 3; //房间ID
+    uint32 member_count = 4; // 房间人数
+    uint64 created = 5; // 创建时间
+    string desc = 6;    // 房间描述
+    repeated Crew members = 7; //聊天室成员
+}
+
+// 系统通知类型
+enum ESignalType {
+    UNKNOWNESIGNALTYPE = 0;
+    CREW_JOIN_SIGNAL = 6;   // 成员加入
+    CREW_EXIT_SIGNAL = 1;   // 成员退出
+    CHATROOM_CLOSE_SIGNAL = 2;  // 聊天室关闭
+    CHATROOM_DELETE_SIGNAL = 3;//聊天室删除
+    OWNER_CHANGED_SIGNAL = 4;   //管理员变更
+    CHATROOM_INFO_CHANGED_SIGNAL = 5;   // 聊天室名称变更
+}
+
+// 聊天室系统通知
+message ChatroomSignal {
+    ESignalType signal_type = 1;    //类型
+    repeated Crew crew_info = 2;    // 业务层根据signal_type解析信令内容
+    ChatroomDetail chatroom_info = 3;   // 聊天室信息
+    uint64 guid = 4; // 全局唯一标识码
+}
+
+
+// 根据聊天室房间名 查询聊天室
+message SearchRoomByNameRequest {
+    string from_username = 1; //查询者用户名
+    string appkey = 2;  // appkey
+    string room_name = 3;   //房间号
+}
+
+// 响应
+message SearchRoomByNameResponse {
+    repeated ChatroomInfo room_info = 1; //聊天室房间信息
+    common.errcode.EErrorCode ret = 2; // 返回码 参见EErrorCode
+}
+
+//根据room id 查询聊天室
+message SearchRoomByIdRequest {
+    string from_username = 1; //查询者用户名
+    string appkey = 2;  // appkey
+    uint64 room_id = 3; //房间id
+}
+
+// 响应
+message SearchRoomByIdResponse {
+    repeated ChatroomInfo room_info = 1; //聊天室房间信息
+    common.errcode.EErrorCode ret = 2; // 返回码 参见EErrorCode
+}
+
+// 获取聊天室列表 返回聊天室名字、聊天室ID、主播昵称
+message GetRoomListRequest {
+    string from_username = 1; //用户名字
+    string appkey = 2;  // appkey
+    string modified = 3; // 0为全量
+}
+// 响应
+message GetRoomListResponse {
+    repeated ChatroomInfo room_info = 1; //聊天室房间信息
+    common.errcode.EErrorCode ret = 2; // 返回码 参见EErrorCode
+}
+
+// 查询聊天室纤细信息
+message QueryRoomDetailRequest {
+     string from_username = 1;    //查询者用户名
+     string appkey = 2;     //
+     uint64 room_id = 3; //房间ID
+}
+
+
+message QueryRoomDetailResponse {
+     ChatroomDetail room_detail = 1;
+     common.errcode.EErrorCode ret = 2; // 返回码 参见EErrorCode
+}
+
+// 设置聊天室名字
+message SetRoomInfoRequest  {
+    string from_name = 1; //主播名字，主播或管理员有权限 更新房间信息
+    string appkey = 2;  // appkey
+    uint64 room_id = 3; //房间ID
+    string room_name = 4; //房间名称
+}
+
+message SetRoomInfoResponse  {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+// 加入聊天室
+message AddMemberToRoomRequest {
+    string from_username = 1; //拉人者用户名字
+    string appkey = 2;  // appkey
+    repeated string invitee_name = 3; //被邀请者名字
+    uint64 room_id = 4; //聊天室ID
+}
+
+// 响应
+message AddMemberToRoomResponse {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+// 加入聊天室
+message JoinRoomRequest {
+    string from_username = 1; // 请求者用户名
+    string appkey = 2;  // appkey
+    uint64 room_id = 3; //房间名称
+}
+
+message JoinRoomResponse {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+//退出聊天室
+message ExitRoomRequest {
+    string from_username = 1; // 请求者用户名
+    string appkey = 2;  // appkey
+    uint64 room_id = 3; //房间名称
+}
+
+message ExitRoomResponse {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+message GetTotalMemberCountRequest {
+    string from_username = 1;// 用户
+    string appkey = 2; //appkey
+    uint64 room_id = 3; //room id
+}
+
+message GetTotalMemberCountResponse {
+    uint64 member_count = 1;
+    common.errcode.EErrorCode ret = 2; // 返回码 参见EErrorCode
+}
+
+message SendRoomMessageRequest {
+    string from_username = 1;  // 发送者用户名
+    string appkey = 2;  //appkey
+    uint64 room_id = 3;  //room id
+    EMsgType msg_type = 4; //聊天消息类型
+    bytes data = 5; //聊天数据
+}
+
+message SendRoomMessageResponse {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+// 聊天室服务
+service ChatroomService {
+	// 通过房间名字查询聊天室
+	rpc SearchRoomByName (SearchRoomByNameRequest) returns(SearchRoomByNameResponse);
+	// 通过房间ID查询聊天室
+	rpc SearchRoomById (SearchRoomByIdRequest) returns (SearchRoomByIdResponse);
+	// 获取聊天室列表
+	rpc GetRoomList (GetRoomListRequest) returns(GetRoomListResponse);
+	// 设置聊天室名字
+	rpc SetRoomInfo (SetRoomInfoRequest) returns(SetRoomInfoResponse);
+	// 添加用户进聊天室
+	rpc AddMemberToRoom (AddMemberToRoomRequest) returns(AddMemberToRoomResponse);
+	// 加入聊天室
+	rpc JoinRoom (JoinRoomRequest) returns(JoinRoomResponse);
+	// 退出聊天室
+	rpc ExitRoom (ExitRoomRequest) returns(ExitRoomResponse);
+	// 获取当前聊天室人数
+	rpc GetTotalMemberCount (GetTotalMemberCountRequest) returns(GetTotalMemberCountResponse);
+	// 发送聊天室消息
+	rpc SendRoomMessage (SendRoomMessageRequest) returns(SendRoomMessageResponse);
+	// 查询聊天室详细信息
+	rpc QueryRoomDetail (QueryRoomDetailRequest) returns (QueryRoomDetailResponse);
+}

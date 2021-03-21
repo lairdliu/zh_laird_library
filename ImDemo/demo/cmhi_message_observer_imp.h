@@ -1,0 +1,28 @@
+/***************************************************************************
+  * file name cmhi_contact_observer_imp.h
+  * brief Listen for message notify from sdk
+  * date 2019/03/13
+  *************************************************************************/
+
+  
+#ifndef CMHI_IM_MESSAGE_OBSERVER_IMP_H_
+#define CMHI_IM_MESSAGE_OBSERVER_IMP_H_
+#include <unistd.h>#include <sys/types.h>#include <fcntl.h>#include <dirent.h>#include <stdio.h>#include <sys/stat.h>#include <string.h>
+#include <string>
+#include <iostream>#include "cmhi_file_message_body.h"#include "cmhi_message_observer.h"#include "cmhi_custom_message_body.h"#include "cmhi_text_message_body.h"#include "cmhi_location_message_body.h"#include "cmhi_audio_message_body.h"#include "cmhi_friend_message_body.h"#include "common_types.h"
+namespace cmhi_iov{
+class TestMessageObserver: public MessageObserverBase{
+
+public:	
+	TestMessageObserver(){}	
+	~TestMessageObserver(){}	
+	
+	virtual void OnUploadProcessing(uint64_t uploaded_size, uint64_t file_size) override {
+		std::cout << "uploaded_size:" << uploaded_size << "file_size:" << file_size << std::endl;
+	}	virtual void OnMessageReceived(MessageWrapperPtr message) override {        std::cout<<"msg_id:"<<message->get_msg_id()<<std::endl;		std::cout<< " from:" << message->get_from()<<std::endl;		std::cout<< " nick_from:" << message->get_nick_from()<<std::endl;		std::cout<< " remoteUsername:" << message->get_conversation_name()<<std::endl;		std::cout<< " remoteNickname:" << message->get_nick_to()<<std::endl;		std::cout<< " fromUsername:" << message->get_from()<<std::endl;		std::cout<< " fromNickname:" << message->get_nick_from()<<std::endl;		std::cout<< " toUsername:" << message->get_to()<<std::endl;		std::cout<< " toNickname:" << message->get_nick_to()<<std::endl;				std::cout<< " messageBody:" << message->get_message_body()<<std::endl;		std::cout<< " msgContent:" << message->get_content()<<std::endl;		std::cout<< " chatType:" << message->get_chat_type()<<std::endl;        		std::cout<< " msgType:" << message->get_msg_type()<<std::endl;        		std::cout<< " isSend:" << message->is_sender() <<std::endl;        		std::cout<< " msg read:" << message->is_msg_read() <<std::endl;        		std::cout<< " audio read:" << message->is_audio_read() <<std::endl;        		std::cout<< " guid:" << message->get_guid() << std::endl;		EMessageBodyType msg_content_type = message->get_msg_type();				if (kMessageBodyTypeText == msg_content_type)        {     			std::shared_ptr<TextMessageBody>  text_message =  std::dynamic_pointer_cast<TextMessageBody>(message->get_message_body());			if (text_message)				std::cout<<"content:"<<text_message->get_text()<< std::endl;			        } 				else if (kMessageBodyTypeFriend == msg_content_type)		{			std::shared_ptr<FriendMessageBody>  friend_message =  std::dynamic_pointer_cast<FriendMessageBody>(message->get_message_body());			if (friend_message)				std::cout<<"content:"<<friend_message->get_text()<< std::endl;		}        else if(kMessageBodyTypeVoice == msg_content_type)         {			std::shared_ptr<AudioMessageBody>	audio_message =  std::dynamic_pointer_cast<AudioMessageBody>(message->get_message_body());			if(audio_message){				std::cout<<"duration:"<<audio_message->get_duration()<< std::endl;				std::cout<<"voice_to_word:"<<audio_message->get_voice_to_word()<<std::endl;				std::cout<< "file_name:"<<audio_message->get_file_name()<<std::endl;				std::cout<<"file_length:"<<audio_message->get_file_length()<<std::endl;				std::cout<<"local_path:"<<audio_message->get_local_path()<<std::endl;				std::cout<<"origin_link:"<<audio_message->get_origin_link()<<std::endl;			}        }		else if(kMessageBodyTypeLocation == msg_content_type)         { 			std::shared_ptr<LocationMessageBody>	location_message =  std::dynamic_pointer_cast<LocationMessageBody>(message->get_message_body());			if(location_message){				std::cout<<"width:"<<location_message->get_width()<< std::endl;				std::cout<<"height:"<<location_message->get_height()<<std::endl;				std::cout<<"longitude:"<<location_message->get_longitude()<<std::endl;				std::cout<<"latitude:"<<location_message->get_latitude()<<std::endl;				std::cout<<"location_desc:"<<location_message->get_location_desc()<<std::endl;				std::cout<<"location_address:"<<location_message->get_location_address()<<std::endl;												std::cout<< "file_name:"<<location_message->get_file_name()<<std::endl;				std::cout<<"file_length:"<<location_message->get_file_length()<<std::endl;				std::cout<<"local_path:"<<location_message->get_local_path()<<std::endl;				std::cout<<"origin_link:"<<location_message->get_origin_link()<<std::endl;				std::cout<<"poi_id:"<<location_message->get_poi_id()<<std::endl;			}        }        else if (kMessageBodyTypeCustom == msg_content_type)		{		}        else if (kMessageBodyTypeRetract == msg_content_type)        {                 }        else if (kMessageBodyTypeReceipt == msg_content_type)        {        }        else if (kMessageBodyTypeSingleReceipt == msg_content_type)        {        }        else        {                }			} 	virtual	void OnMessageSendStatus(string msg_id, EMessageStatus status, EErrorCode errorCode) override{		std::cout<<"OnMessageSendStatus:"<<std::endl;		std::cout<<"msg_id:"<<msg_id<<std::endl;		std::cout<<"status:"<<status<<std::endl;		std::cout<<"errorCode:"<<errorCode<<std::endl;	}
+};
+
+}
+#endif  //CMHI_IM_MESSAGE_OBSERVER_IMP_H_
+
+

@@ -1,0 +1,77 @@
+syntax = "proto3";
+
+package outer.live;
+
+import "common/errcode.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "Live";
+
+/* 直播间详情 */
+message LiveInfo{
+  string live_name = 1;
+  string anchor_username = 2;
+  string anchor_nick = 3;
+  string desc = 4;
+  string head_image = 5;
+  string thumb = 6;
+}
+
+/* 创建直播间*/
+message CreateLiveRoomRequest{
+    string appkey = 1;  //必填
+    string anchor_username = 2; //必填
+    string anchor_nick = 3; //必填
+    string live_name = 4; //选填
+    string head_image = 5; //选填
+    string desc = 6;//选填
+}
+
+message CreateLiveRoomResponse{
+    string live_id = 1;  //直播间ID
+    string room_id = 2;  //聊天室ID
+	common.errcode.EErrorCode ret = 3;
+}
+
+/* 开始直播*/
+message StartStreamingRequest{
+    string username = 1;
+    string appkey = 2;
+    string live_id = 3;  //直播间ID
+}
+
+message StartStreamingResponse{
+    string stream_id = 1;    //rtmp流ID
+	common.errcode.EErrorCode ret = 2;
+}
+
+/* 关闭直播*/
+message StopStreamingRequest{
+    string username = 1;
+    string appkey = 2;
+    string room_id = 3;
+}
+
+message StopStreamingResponse{
+	common.errcode.EErrorCode ret = 2;
+}
+
+/* 查询直播列表*/
+message QueryLiveListRequest{
+    string appkey = 1;
+    string username = 2;
+}
+
+message QueryLiveListResponse{
+	common.errcode.EErrorCode ret = 1;
+    repeated LiveInfo live_info = 2;
+}
+
+service LiveService{
+
+    rpc CreateLiveRoom (CreateLiveRoomRequest) returns (CreateLiveRoomResponse);
+    rpc StartStreaming (StartStreamingRequest) returns (StartStreamingResponse);
+    rpc StopStreaming (StopStreamingRequest) returns (StopStreamingResponse);
+    rpc QueryLiveList (QueryLiveListRequest) returns (QueryLiveListResponse);
+}

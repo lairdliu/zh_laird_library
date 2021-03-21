@@ -1,0 +1,224 @@
+syntax = "proto3";
+
+package outer.switch;
+
+import "common/errcode.proto";
+import "common/enumeration.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "Switch";
+
+// 呼叫媒体类型
+enum ECallMediaType
+{
+	UNKNOWN = 0;
+	AUDIO = 3;	// 语音
+	VIDEO = 1;	// 视频
+	AV = 2;		// 音视频
+}
+
+// 呼叫状态
+enum ECallState
+{
+	UNKNOWNSTATE = 0;
+	RINGING = 6;
+	CONNECTED = 1;
+	CALLEE_BUSY = 2;
+	CALLEE_REFUSED = 3;
+	CALLER_CANCELED = 4;
+	FINISH = 5;
+}
+
+// 呼叫请求
+message InviteRequest {
+	ECallMediaType call_media_type = 1;
+	string appkey = 2;
+	string from_username = 3;
+	string to_username = 4;
+	string local_ip = 5;	//主叫方ip
+	uint32 local_audio_port = 6;	//主叫方语音端口
+	string local_audio_codec_list = 7;	//主叫方语音编码集
+	uint32 local_video_port = 8;	//主叫方视频端口
+	string local_video_codec_list = 9;	//主叫方视频编码集
+}
+// 呼叫响应
+message InviteResponse
+{
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+	uint64 callid = 2;
+	string mrf_ip = 3;	//MRF服务器IP
+	uint32 mrf_audio_port = 4;	//MRF分配给主叫的语音端口
+	uint32 mrf_video_port = 5;	//MRF分配给主叫的视频端口
+}
+// 呼叫消息
+message InviteMessage {
+	string callid = 1;
+	ECallMediaType call_media_type = 2;
+	string appkey = 3;
+	string from_username = 4;
+	string to_username = 5;
+	string remote_audio_codec_list = 6;	//主叫方语音编码集
+	string remote_video_codec_list = 7;	//主叫方视频编码集
+	string mrf_ip = 8;	//MRF服务器IP
+	uint32 mrf_audio_port = 9;	//MRF分配给被叫的语音端口
+	uint32 mrf_video_port = 10;	//MRF分配给被叫的视频端口
+}
+
+// 接听请求
+message ConnectRequest {
+	string callid = 1;
+	string local_ip = 2;	//被叫方ip
+	uint32 local_audio_port = 3;	//被叫方语音端口
+	string local_audio_codec_list = 4;	//被叫方语音编码集
+	uint32 local_video_port = 5;	//被叫方视频端口
+	string local_video_codec_list = 6;	//被叫方视频编码集
+}
+// 接听响应
+message ConnectResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+// 接听消息
+message ConnectMessage {
+	string callid = 1;
+	string callee_audio_codec_list = 2;	//被叫方语音编码集
+	string callee_video_codec_list = 3;	//被叫方视频编码集
+}
+
+// 忙请求
+message BusyRequest {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+// 忙响应
+message BusyResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+// 忙消息
+message BusyMessage {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+
+// 取消请求
+message CancelRequest {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+// 取消响应
+message CancelResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+// 取消消息
+message CancelMessage {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+
+// 拒接请求
+message RefuseRequest {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+// 拒接响应
+message RefuseResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+// 拒接消息
+message RefuseMessage {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+
+// 挂断请求
+message ByeRequest {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+// 挂断响应
+message ByeResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+// 挂断消息
+message ByeMessage {
+	string callid = 1;
+	string appkey = 2;
+	string from_username = 3;
+}
+
+// reinvite请求
+message ReinviteRequest {
+	ECallMediaType call_media_type = 1;
+	string appkey = 2;
+	string from_username = 3;
+	string local_ip = 5;	//发起方ip
+	uint32 local_audio_port = 6;	//发起方语音端口
+	string local_audio_codec_list = 7;	//发起方语音编码集
+	uint32 local_video_port = 8;	//发起方视频端口
+	string local_video_codec_list = 9;	//发起方视频编码集
+}
+// reinvite响应
+message ReinviteResponse
+{
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+	uint64 callid = 2;
+	string mrf_ip = 3;	//MRF服务器IP
+	uint32 mrf_audio_port = 4;	//MRF分配的语音端口
+	uint32 mrf_video_port = 5;	//MRF分配的视频端口
+}
+// reinvite消息
+message ReinviteMessage {
+	string callid = 1;
+	ECallMediaType call_media_type = 2;
+	string appkey = 3;
+	string from_username = 4;
+	string to_username = 5;
+	string remote_audio_codec_list = 6;	//对端语音编码集
+	string remote_video_codec_list = 7;	//对端视频编码集
+	string mrf_ip = 8;	//MRF服务器IP
+	uint32 mrf_audio_port = 9;	//MRF分配的语音端口
+	uint32 mrf_video_port = 10;	//MRF分配的视频端口
+}
+
+message CallMessage
+{
+	common.enumeration.ECallMsgType call_msg_type = 1;
+	bytes call_msg = 2;	//根据call_msg_type进行解析
+}
+// SyncCall请求
+message SyncCallRequest {
+	string appkey = 1;
+	string from_username = 2;
+	string call_msg_guid = 3;
+}
+// SyncCall响应
+message SyncCallResponse {
+	common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+	repeated CallMessage call_message = 2;
+}
+
+service SwitchService {
+	// SyncCall
+	rpc SyncCall(SyncCallRequest) returns (SyncCallResponse);
+	// 呼叫
+	rpc Invite (InviteRequest) returns (InviteResponse);
+	// 接听
+	rpc Connect (ConnectRequest) returns (ConnectResponse);
+	// 忙
+	rpc Busy (BusyRequest) returns (BusyResponse);
+	// 取消
+	rpc Cancel (CancelRequest) returns (CancelResponse);
+	// 拒接
+	rpc Refuse (RefuseRequest) returns (RefuseResponse);
+	// 挂断
+	rpc Bye (ByeRequest) returns (ByeResponse);
+	// reinvite
+	rpc Reinvite (ReinviteRequest) returns (ReinviteResponse);
+}

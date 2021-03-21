@@ -1,0 +1,30 @@
+syntax = "proto3";
+package common.data;
+
+import "common/enumeration.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.common";
+option java_outer_classname = "Data";
+
+//group data struts
+message UserAndNick{
+    string username = 1;
+    string nick = 2;
+}
+
+message UserAndRole{
+    string username = 1;
+    common.enumeration.ECrewType role = 2;
+}
+
+message MemberInfo{
+    string username = 1;
+    string nick = 2;
+    common.enumeration.ECrewType role = 3;
+}
+
+message UserAndMsg{
+    string username = 1;
+    string msg = 2;
+}

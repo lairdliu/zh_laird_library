@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package outer.monitor;
+
+import "common/errcode.proto";
+import "common/base.proto";
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "Monitor";
+
+// 请求调优日志上传
+message OptimizeLogRequest {
+	common.base.MobileBase base_info = 1;  // 移动端基本信息
+	uint64 time = 2; // 出现请求超时的系统时间
+	string username = 3;	// 登陆帐号
+	string appkey = 4; // appkey
+	string service_name = 5; // 调用服务名
+	string invoke_method = 6; // 调用方法名
+}
+
+// 请求调优日志上传响应
+message OptimizeLogResponse {
+	common.errcode.EErrorCode ret = 1; //错误码
+}
+
+
+// Monitor 服务
+service MonitorService {
+    // 上传调优日志
+	rpc SendOptimizeLog (OptimizeLogRequest) returns (OptimizeLogResponse); 
+}

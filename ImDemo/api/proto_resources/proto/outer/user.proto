@@ -1,0 +1,271 @@
+syntax = "proto3";
+package outer.user;
+import "common/errcode.proto";
+import "common/enumeration.proto";
+import "common/base.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.outer";
+option java_outer_classname = "User";
+
+//用户信息
+message UserInfo {
+    string username = 1;//登录流程图中的uid
+    string appkey = 2;
+    string nick = 3;//昵称
+    string phone = 4;//手机号码
+    string original_link = 5;//原图
+    string thumbnail_link = 6;//缩略图
+    uint64 created = 7;
+    uint64 modified = 8;
+    string province = 9;//省份
+    string country = 10;//国家
+    string sex = 11;//性别
+    bool join_fleet = 12; //是否加入车队
+    string fleet_uri = 13; //车队的唯一标识
+    string nick_pinyin = 14; // 昵称的中文字 拼音首字母
+    string display = 15; //备注名
+    string display_pinyin = 16; //备注名的中文字 拼音首字母
+    string nick_pinyin_blank = 17; // 昵称的中文字 拼音用空格格开（新加）
+    string serial_name = 18; // 车辆属性（新加）
+    uint32 member_type = 19; // 车主标识（新加）
+    uint32 enable = 20; // 用户是否注销
+}
+
+// user登陆请求
+message UserLoginRequest {
+	string username = 1;//登录流程图中的uid
+	string appkey = 2;
+	string password = 3;
+	string appkey_password = 4;
+	bool SHA256 = 5;   // 默认false，若传递SHA256密文密码，需设置为true
+	common.base.MobileBase base_info = 6;
+	bool is_auto_login = 7;	//是否自动登录(重连)
+	string token = 8;
+    common.enumeration.ELoginMode login_mode = 9; // 登录模式（必填）
+}
+
+// user登陆响应
+message UserLoginResponse {
+	common.errcode.EErrorCode ret = 1;
+	UserInfo user_infos = 2;
+}
+
+// user注册请求
+message UserRegisterRequest {
+    string username = 1;
+    string appkey = 2;
+    string password = 3;
+    string nick = 4;
+    string phone = 5;
+    string appkey_password = 6;
+    bool SHA256 = 7;    // 默认false，若传递SHA256密文密码，需设置为true
+}
+// user注册响应
+message UserRegisterResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+// user更新密码请求
+message PasswordUpdateRequest {
+    string username = 1;
+    string appkey = 2;
+    string password =3;
+    bool SHA256 = 4;    // 默认false，若传递SHA256密文密码，需设置为true
+}
+// user更新密码响应
+message PasswordUpdateResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+// user更新昵称请求
+message NickUpdateRequest {
+    string username = 1;
+    string appkey = 2;
+    string nick =3;
+    common.enumeration.EClientType fromClientType = 4; //请求者的客户端类型(必填)
+}
+// user更新昵称响应
+message NickUpdateResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+// user手机号请求
+message PhoneUpdateRequest {
+    string username = 1;
+    string appkey = 2;
+    string update_phone =3;
+    common.enumeration.EClientType fromClientType = 4; //请求者的客户端类型(必填)
+}
+// user更新手机号响应
+message PhoneUpdateResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+// user 搜索请求
+message UserSearchRequest {
+    string username = 1;
+    string appkey = 2;
+    uint32 start = 3;
+    uint32 range = 4;
+    string search_key = 5;
+}
+// user 搜索响应
+message UserSearchResponse {
+    common.errcode.EErrorCode ret = 1;
+    repeated UserInfo user_infos = 2;
+    uint32 totalcount = 3;
+}
+
+// user获取个人信息请求
+message GetUserInfoRequest {
+    string username = 1;
+    string appkey = 2;
+}
+// user获取个人信息响应
+message GetUserInfoResponse {
+    common.errcode.EErrorCode ret = 1;
+    UserInfo user_infos = 2;
+}
+
+// 批量查询用户请求
+message BatchGetUserInfoRequest {
+    string appkey = 1;
+    repeated string username = 2;
+}
+// 批量查询用户响应
+message BatchGetUserInfoResponse {
+    common.errcode.EErrorCode ret = 1;
+    repeated UserInfo user_info = 2;
+}
+
+// 查询userlist中存在和不存在的用户集合
+message CheckUserListRequest {
+    string appkey = 1;
+    repeated string username = 2;
+}
+message CheckUserListResponse {
+    common.errcode.EErrorCode ret = 1;
+    repeated string exist_users = 2;
+    repeated string unexist_users = 3;
+}
+
+message SetSilentStateRequest{
+    string from = 1; // 被屏蔽者
+    string to = 2; // 屏蔽者
+    string appkey = 3;
+    common.enumeration.ESilent silent = 4; //  静默设置，YES:设置静默，NO:取消静默
+    common.enumeration.EClientType from_client_type = 5; // 发送者终端类型
+}
+
+message SetSilentStateResponse{
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+// user上传头像请求
+message UploadAvatarRequest {
+    string username = 1;
+    string appkey = 2;
+    string original_link = 3;
+    string thumbnail_link = 4;
+    common.enumeration.EClientType fromClientType = 5; //请求者的客户端类型(必填)
+}
+// user上传头像响应
+message UploadAvatarResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+// 获取屏蔽用户列表请求
+message GetMyShieldingListRequest {
+    string appkey = 1;
+    string username = 2;
+}
+
+// 获取屏蔽用户列表响应
+message GetMyShieldingListResponse {
+    common.errcode.EErrorCode ret = 1;
+    repeated string usernames = 2;
+}
+
+message SetShieldingStateRequest {
+    string other_username = 1; // 被屏蔽的陌生人
+    string myself_username = 2; // 用户自己
+    string appkey = 3;
+    bool is_shielding = 4; // 屏蔽设置，true:设置屏蔽，false:取消屏蔽
+    common.enumeration.EClientType from_client_type = 5; // 发送者终端类型
+}
+
+message SetShieldingStateResponse {
+    common.errcode.EErrorCode ret = 1; // 返回码 参见EErrorCode
+}
+
+// 查询用户登录状态请求
+message QueryUserOnlineStatusRequest {
+    string username = 1;// 登录流程图中的uid
+    string appkey = 2;
+}
+// 查询用户登录状态响应
+message QueryUserOnlineStatusResponse {
+    common.errcode.EErrorCode ret = 1;
+    common.enumeration.EUserOnlineStatus mobile_phone = 2;//手机端在线状态
+    common.enumeration.EUserOnlineStatus car_machine = 3;//车机端在线状态
+}
+
+//  手机端踢车机端登出请求
+message KickCarMachineRequest {
+    string username = 1;//登录流程图中的uid
+    string appkey = 2;
+    common.base.MobileBase base_info = 3;
+    repeated common.enumeration.EClientType Kick_client_type = 4;//被踢的客户端类型
+    string reason = 5; //踢人原因
+}
+//  手机端踢车机端登出响应
+message KickCarMachineResponse {
+    common.errcode.EErrorCode ret = 1;
+}
+
+// user更新备注名请求
+message DisplayUpdateRequest {
+    string username = 1;
+    string appkey = 2;
+    string display =3; //备注名
+    common.enumeration.EClientType fromClientType = 4; //请求者的客户端类型(必填)
+}
+// user更新备注名响应
+message DisplayUpdateResponse {
+    common.errcode.EErrorCode ret = 1;
+    string reason = 2;
+}
+
+service UserService {
+	rpc UserLogin(UserLoginRequest) returns (UserLoginResponse);
+	rpc UserRegister(UserRegisterRequest) returns(UserRegisterResponse);
+    rpc PasswordUpdate(PasswordUpdateRequest) returns(PasswordUpdateResponse);
+    rpc NickUpdate(NickUpdateRequest) returns(NickUpdateResponse);
+    rpc PhoneUpdate(PhoneUpdateRequest) returns(PhoneUpdateResponse);
+    rpc UserSearch(UserSearchRequest) returns(UserSearchResponse);
+
+    // user更新备注名
+    rpc DisplayUpdate(DisplayUpdateRequest) returns(DisplayUpdateResponse);
+    // 获取个人信息
+	rpc GetUserInfo(GetUserInfoRequest) returns(GetUserInfoResponse);
+    // 查询用户登录状态
+    rpc QueryUserOnlineStatus(QueryUserOnlineStatusRequest) returns(QueryUserOnlineStatusResponse);
+    //  手机端踢车机端登出
+    rpc KickCarMachine(KickCarMachineRequest ) returns(KickCarMachineResponse );
+
+
+	rpc SetSilentState(SetSilentStateRequest) returns(SetSilentStateResponse);
+	rpc UploadAvatar(UploadAvatarRequest) returns(UploadAvatarResponse);
+    rpc BatchGetUserInfo(BatchGetUserInfoRequest) returns(BatchGetUserInfoResponse);
+    rpc CheckUserList(CheckUserListRequest) returns(CheckUserListResponse);
+    // 获取屏蔽用户列表
+    rpc GetMyShieldingList (GetMyShieldingListRequest) returns (GetMyShieldingListResponse);
+    // 屏蔽用户
+    rpc SetShieldingState (SetShieldingStateRequest) returns (SetShieldingStateResponse);
+}

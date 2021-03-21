@@ -1,0 +1,232 @@
+syntax = "proto3";
+
+package common.msg;
+
+import "common/enumeration.proto";
+
+option java_multiple_files = false;
+option java_package = "com.cmcc.littlec.proto.common";
+option java_outer_classname = "Msg";
+
+//消息单元
+message MessageUnit {
+    common.msg.EMsgType msg_type = 1; // 消息类型
+    bytes data = 2; //序列化后的消息体，根据消息类型 msg_type 来封装/解析 消息结构体，比如 msg_type=CHAT_MSG，那么data的结构体为outer.ChatMessage
+    bool is_retracted = 3; //是否已撤回
+}
+
+// 消息类型
+enum EMsgType {
+    CHAT_MSG = 0; // 单聊消息
+    GROUP_MSG = 1; // 群聊消息
+    GROUP_SIGNAL = 2; //群聊信令
+    MSGGW_MSG = 3; // 消息网关消息
+    SYSTEM_MSG = 4; // 系统消息
+    MULTI_MSG = 5; // 群发消息
+    CHATROOM_MSG = 6; //聊天室消息
+    PRIVATE_MSG = 7; //私密消息
+    FLEET_SIGNAL = 8; // 车队信令
+    TRANSPARENT_MSG = 9; //透传消息
+    INVITATION_MSG = 10; //邀请类消息
+    INVITATION_BATCH_MSG = 11; //批量邀请类消息
+}
+
+// 单聊消息，用于拉取消息&平台内部交互，（MessageUnit中 msg_type=CHAT_MSG 时，MessageUnit中的 data就为此结构体）
+message ChatMessage {
+    string from_username = 1; // 发送方username
+    string appkey = 2; // appkey, 各应用在官网申请
+    string from_nick = 3; // 发送方昵称，选填
+    EMsgContentType msg_content_type = 4; // 消息类型，文本、图片、语音、视频等
+    bytes data = 5; // 业务层根据msg_content_type解析具体消息内容
+    uint64 guid = 6; // 全局唯一标识码，由chat服务生成
+    string msg_id = 7; // 终端生成，便于发送方重发&接收方去重
+    bool burn_after_read = 8; // 是否阅后即焚
+    string to_username = 9; // 接收者username
+    bool is_jimao = 10; // 是否鸡毛信
+    bool is_read = 11; //是否已读
+    string from_phone = 12; //发送方的手机号码
+    bool to_user_is_unregistered = 13; // 接收方用户是否已经注册，true表示没有注册，fasle表示已经注册过
+    string to_phone = 14; // 接收方的手机号码，当发送给非平台用户的时候（to_user_is_unregistered=true） 必填
+    uint32 user_enable = 15; // 接收方是否为平台注销用户
+    string from_thumbnail = 16;//发送者头像缩略图
+}
+
+// 群消息 （common.msg.MessageUnit中 msg_type=GROUP_MSG 时，common.msg.MessageUnit中的 data就为此结构体）
+message GroupMessage {
+    string from_username = 1; // 发送方username
+    string from_nick = 2; // 发送方昵称
+    string appkey = 3; // appkey
+    string uri = 4; // 群uri
+    EMsgContentType msg_content_type = 5; // 消息内容类型，文本、图片、语音、视频等
+    bytes data = 6; // 业务层根据type解析具体消息内容
+    uint64 guid = 7; // 全局唯一标识码，group服务生成
+    string msg_id = 8; // 终端生成，便于发送方重发&接收方去重
+    string group_name = 9; // 群名称
+    bool is_jimao = 10; // 是否鸡毛信
+    bool is_read = 11; //是否已读
+}
+
+// 透传消息，用于拉取自定义通知消息&平台内部交互
+message TransparentMessage {
+    string appkey = 1; // appkey, 各应用在官网申请
+    string from_username = 2; // 发送方用户名，选填发送方为空时置空
+    string to_useranem = 3; // 接收方用户名
+    bytes data = 4; // CustomMessage 的bytes压缩
+    uint64 guid = 5; // 全局唯一标识码，由chat服务生成
+    string msg_id = 6; // 终端生成，便于发送方重发&接收方去重
+    string from_nick = 7; // 发送方昵称，选填发送方为空时置空
+}
+
+// 消息内容类型
+enum EMsgContentType {
+    TEXT = 0; // 文本消息
+    IMAGE = 1; // 静态图片消息
+    VIDEO = 2; //视频消息
+    AUDIO = 3; // 语音消息
+    LOCATION = 4; // 位置消息
+    AT = 5; // At消息
+    READ_RECEIPT = 6; // 回执消息
+    FILE = 7; // 普通文件消息
+    RETRACT = 8; // 撤回消息
+    CUSTOM = 9; //自定义消息(包含一键接人自定义消息，提供消息通道功能)
+    JIMAO_READED = 10; // 鸡毛信已读信令
+    JIMAO_SENDED = 11; // 鸡毛信已发短信信令
+    VCARD = 12; // 名片消息
+
+    SINGLE_READ_RECEIPT = 13; // 单条消息已读
+
+    MERGE_MSG = 14;//合并消息
+
+    APPLY_FRIEND = 20; //邀请好友
+    CUSTOM_NO_APNS = 31; //自定义消息,不需apns(终端已有类型在10-30区间)
+    CUSTOM_FAMILY = 32;
+    FRIEND_MSG = 33; //好友同意第一条消息
+}
+//好友消息类型
+message FriendMessage {
+    string text = 1; //好友消息文本
+}
+
+// 文本消息
+message TextMessage {
+    string text = 1; // 单聊消息文本
+    bool burn_after_read = 2; // 是否阅后即焚
+}
+
+// 图片消息
+message ImageMessage {
+    string file_name = 1; // 图片文件名称
+    string origin_link = 2; // 原始链接
+    string big_link = 3; // 大图连接
+    string middle_link = 4; // 中图链接
+    string small_link = 5; // 小图链接
+    uint64 file_length = 6; // 文件大小，以B为单位
+    bool isOrigin = 7; // 客户端是否发送原图
+    uint32 small_width = 8; // 小图图片宽度
+    uint32 small_height = 9; // 小图图片高度
+    uint32 middle_width = 10; // 中图图片宽度
+    uint32 middle_height = 11; // 中图图片高度
+}
+
+// 视频消息
+message VideoMessage {
+    string file_name = 1; // 视频文件名称
+    string video_link = 2; // 视频链接
+    string video_screen_short_link = 3; // 视频快照图链接
+    uint64 file_length = 4; // 文件大小，以B为单位
+    uint32 duration = 6; // 视频时长，以s为单位
+    uint32 width = 9; // 视频图片宽度
+    uint32 height = 10; // 视频图片高度
+}
+
+// 语音消息
+message AudioMessage {
+    string file_name = 1; // 语音文件名称
+    string audio_link = 2; // 语音链接
+    uint64 file_length = 4; // 文件大小，以B为单位
+    uint32 duration = 5; // 语音时长，以s为单位
+    string audio_to_word = 6; // 语音转文字
+}
+
+// 位置消息
+message LocationMessage {
+    string file_name = 1; // 位置缩略图名称
+    string origin_link = 2; // 位置图片链接
+    uint64 file_length = 4; // 文件大小，以B为单位
+    uint32 width = 5; // 图片宽度
+    uint32 height = 6; // 图片高度
+    double longitude = 7; // 经度
+    double latitude = 8; // 纬度
+    string location_desc = 9; // 位置描述信息
+    string location_address = 10; // 位置地址
+    string poi_id = 11; //（POINT OF INTERFACE）的识别码
+}
+
+// @消息
+message AtMessage {
+    repeated string at_member = 1; // @成员用户名
+    bool at_all = 2; // 是否@所有成员
+    string text = 3; // @消息内容
+}
+
+// 已读回执消息
+message ReadReceiptMessage {
+    uint64 receipt_guid = 1; // 标识该回执对应的消息的guid
+}
+
+// 文件消息
+message FileMessage {
+    string file_name = 1; // 文件名
+    string file_link = 2; // 文件链接
+    uint64 file_length = 3; // 文件大小
+}
+
+// 撤回消息
+message RetractMessage {
+    uint64 retract_guid = 1; // 被撤回消息的guid
+}
+
+// 自定义消息实体
+message CustomEntity {
+    string key = 1;
+    string value = 2;
+}
+// 自定义消息
+message CustomMessage {
+    string subType = 1; // 消息子类型
+    string notification = 2; // 通知内容，apns/安卓通知栏展现
+    repeated CustomEntity custom_entity = 3;
+}
+
+// 自定义消息(过滤apns)
+message CustomNoApnsMessage {
+    string subType = 1; // 消息子类型
+    string notification = 2; // 通知内容，apns/安卓通知栏展现
+    repeated CustomEntity custom_entity = 3;
+}
+
+//消息网关消息
+message MsggwMessage {
+    string appkey = 1;
+    string content = 2;
+    uint64 guid = 3;
+    string notification = 4;
+    string from = 5;
+}
+
+// 名片消息
+message VcardMessage {
+    string user_id = 1; // 业务层用户标识（帐号ID，群名片为群号）
+    string nick = 2; // 用户昵称（群名称复用）
+    string phone_num = 3; // 用户号码
+    common.enumeration.EVcardMsgModelType vcard_type = 4; // 名片类型
+    string original_link = 5; // 原链接
+    string thumbnail_link = 6; //  缩略图链接
+}
+
+//合并消息消息体
+message MergeMessage {
+    string title = 1;//消息标题
+    repeated string msgContent = 2;//逐条消息纯文字内容
+    repeated uint64 guidList = 3;//消息guid列表
+}
